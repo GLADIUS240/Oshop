@@ -16,13 +16,15 @@ import { AppUser } from '../models/app-user';
 })
 export class BsNavbarComponent implements OnInit {
   user$: Observable<User | null> | undefined;  // Directly use the user$ observable from AuthService
-  appUser!: AppUser;
+  appUser!: AppUser|null;
   constructor(@Inject(PLATFORM_ID) private platformId: Object, private authService: AuthService) {
-    authService.appUser$.subscribe(appUser=>this.appUser);
+    
   }
 
   ngOnInit(): void {
-    // No need to handle authState here; it's already handled by AuthService
+    this.authService.appUser$.subscribe(appUser => {
+      this.appUser = appUser;
+    });// No need to handle authState here; it's already handled by AuthService
   }
 
   // Logout method utilizing AuthService
