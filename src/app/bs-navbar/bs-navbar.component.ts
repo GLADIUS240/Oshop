@@ -16,7 +16,7 @@ import { AppUser } from '../models/app-user';
 })
 export class BsNavbarComponent implements OnInit {
   user$: Observable<User | null> | undefined;  // Directly use the user$ observable from AuthService
-  appUser!: AppUser|null;
+  appUser: AppUser | null = null;
   constructor(@Inject(PLATFORM_ID) private platformId: Object, private authService: AuthService) {
     
   }

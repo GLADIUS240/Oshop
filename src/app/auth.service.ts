@@ -32,7 +32,7 @@ export class AuthService {
         this.userService.save(user);  // Call save method here
         const returnUrl = localStorage.getItem('returnUrl') || '/';
         this.router.navigateByUrl(returnUrl);
-        localStorage.removeItem('returnUrl');
+       
         console.log('User signed in:', user);
       })
       .catch((error) => {
@@ -52,10 +52,18 @@ export class AuthService {
   }
 
 
-  get appUser$():Observable<AppUser | null>{
+  get appUser$(): Observable<AppUser | null> {
     return this.user$.pipe(
       switchMap(user => {
-        return this.userService.get(user!.uid); // Fetch user data if logged in
-      }))
+        if (!user) {
+          return new Observable<AppUser | null>((observer) => {
+            observer.next(null); // Return null if no user is logged in
+            observer.complete();
+          });
+        }
+        return this.userService.get(user.uid); // Fetch user data if logged in
+      })
+    );
   }
+  
 }

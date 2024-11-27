@@ -40,7 +40,7 @@ export class UserService {
           if (snapshot.exists()) {
             observer.next(snapshot.val() as AppUser); // Successfully retrieved the data
           } else {
-            observer.error('No data available for this user');
+            observer.next(null); // Return null if no data exists for this user
           }
         })
         .catch((error) => {
@@ -48,4 +48,5 @@ export class UserService {
         });
     });
   }
+  
 }
