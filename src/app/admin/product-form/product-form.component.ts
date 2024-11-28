@@ -1,4 +1,4 @@
-import { Component, NgModule } from '@angular/core';
+import { Component } from '@angular/core';
 import { CategoryService } from '../../category.service';
 import { Observable } from 'rxjs';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
@@ -13,7 +13,9 @@ import { ProductService } from '../../product.service';
   styleUrl: './product-form.component.css'
 })
 export class ProductFormComponent {
-  categories$: Observable<any> | undefined
+  categories$: Observable<any> | undefined;
+  urlPattern: string = "https?://.+\..+";
+  
 constructor(categoryService:CategoryService,private productService:ProductService){
   this.categories$=categoryService.getCategories();
 }
