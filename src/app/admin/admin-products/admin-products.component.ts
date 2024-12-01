@@ -1,33 +1,64 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../product.service';
-import { map, Observable, Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { CommonModule, NgFor } from '@angular/common';
 import { Product } from '../../models/product';
+import { DataTableDirective } from 'angular-datatables';
+import { DataTablesModule } from 'angular-datatables'; 
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [RouterLink,NgFor,CommonModule],
+  imports: [RouterLink, NgFor, CommonModule, DataTablesModule], 
   templateUrl: './admin-products.component.html',
-  styleUrl: './admin-products.component.css'
+  styleUrls: ['./admin-products.component.css']
 })
-export class AdminProductsComponent implements OnDestroy {
-  products: Product[] | undefined ;
+export class AdminProductsComponent implements OnInit, OnDestroy {
+  products: Product[] | undefined;
   filteredProducts: any[] | undefined;
-  subscription:Subscription | undefined;
-  constructor(private productService:ProductService){
-    this.subscription=this.productService.getProducts().subscribe(products=>this.filteredProducts=this.products=products);
+  subscription: Subscription | undefined;
+
+  dtOptions: any = {};
+  dtTrigger: Subject<any> = new Subject();
+
+  constructor(private productService: ProductService) {
+    
+    this.subscription = this.productService.getProducts().subscribe(products => {
+      this.dtTrigger.next({});
+      this.filteredProducts = this.products = products;
+      
+    });
   }
 
-  filter(query:string){
-    this.filteredProducts=(query)?
-    this.products?.filter(p=>p.title.toLowerCase().includes(query.toLowerCase())) :
-    this.products;
+  ngOnInit(): void {
+    this.dtOptions = {
+      paging: true,
+      searching: false,
+      ordering: true,
+      pageLength: 10,
+      responsive: true, 
+      autoWidth: true,
+      scrollY:'400',
+      columnDefs: [
+        { 
+          targets: 2,  // Target the 3rd column (Edit column)
+          orderable: false,
+          ordering:false  // Disable sorting for this column
+        }
+      ],
+    };
+  }
+
+  filter(query: string): void {
+    this.filteredProducts = query ? 
+      this.products?.filter(p => p.title.toLowerCase().includes(query.toLowerCase())) :
+      this.products;
+    this.dtTrigger.next({}); 
   }
 
   ngOnDestroy(): void {
-      this.subscription?.unsubscribe();
+    this.subscription?.unsubscribe();
+    this.dtTrigger.unsubscribe();
   }
-
 }
