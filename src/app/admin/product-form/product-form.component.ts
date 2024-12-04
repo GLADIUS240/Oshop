@@ -6,12 +6,13 @@ import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Product } from '../../models/product';
+import { ProductCardComponent } from '../../product-card/product-card.component';
 
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [NgFor,CommonModule,FormsModule,NgIf],
+  imports: [NgFor,CommonModule,FormsModule,NgIf,ProductCardComponent],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.css'
 })

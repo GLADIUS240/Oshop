@@ -1,0 +1,10 @@
+.card-footer{
+    padding:0;
+}
+.card{
+    margin-bottom:30px;
+}
+.card-img-top{
+    aspect-ratio:3/2;
+    object-fit: cover;
+}
