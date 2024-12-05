@@ -11,6 +11,7 @@ import { provideDatabase, getDatabase } from '@angular/fire/database';
 import { AdminAuthGuardService } from './admin-auth-guard.service';
 import { CategoryService } from './category.service';
 import { ProductService } from './product.service';
+import { ShoppingCartService } from './shopping-cart.service';
 
 export const appConfig: ApplicationConfig = {
   
@@ -18,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideDatabase(() => getDatabase()),
-    AuthService,AuthGuardService,UserService,AdminAuthGuardService,CategoryService,ProductService,
+    AuthService,AuthGuardService,UserService,AdminAuthGuardService,CategoryService,ProductService,ShoppingCartService,
     provideRouter(routes)  // Use the routes here
   ]
   

@@ -20,7 +20,10 @@ export class ProductFormComponent {
   categories$: Observable<any> | undefined;
   urlPattern: string = "https?://.+\..+";
   id;
-  product: Product = { title: '', price: 0, category: '', imageUrl: '' };
+  product: Product = {
+    title: '', price: 0, category: '', imageUrl: '',
+    $key: ''
+  };
   
 constructor(
   private route:ActivatedRoute,
