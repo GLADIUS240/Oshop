@@ -1,11 +1,13 @@
 import { Component, Inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { CommonModule, NgIf, isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../auth.service';
-import { User } from '@angular/fire/auth';  // Import User from firebase/auth
+import { User } from '@angular/fire/auth';  
 import { AppUser } from '../models/app-user';
+import { ShoppingCartService } from '../shopping-cart.service';
+import { get } from '@angular/fire/database';
 
 @Component({
   selector: 'bs-navbar',
@@ -15,22 +17,51 @@ import { AppUser } from '../models/app-user';
   styleUrls: ['./bs-navbar.component.css']
 })
 export class BsNavbarComponent implements OnInit {
-  user$: Observable<User | null> | undefined;  // Directly use the user$ observable from AuthService
+  user$: Observable<User | null> | undefined; 
   appUser: AppUser | null = null;
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private authService: AuthService) {
+  private cartSubscription: Subscription = Subscription.EMPTY;
+  cartItemCount: number = 0;
+
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private authService: AuthService,
+  private shoppingCartService:ShoppingCartService) {
     
   }
 
   ngOnInit(): void {
     this.authService.appUser$.subscribe(appUser => {
       this.appUser = appUser;
-    });// No need to handle authState here; it's already handled by AuthService
+    });
+
+    this.shoppingCartService.getCart().then(cartRef => {
+      get(cartRef).then(snapshot => {
+        const cart = snapshot.val(); 
+
+        if (cart && cart.items) {
+          this.cartItemCount = Object.values(cart.items).reduce((sum: number, item: any) => {
+            return sum + item.quantity; 
+          }, 0);
+        } else {
+          this.cartItemCount = 0; 
+        }
+      });
+    });
+
+    this.cartSubscription = this.shoppingCartService.cart$.subscribe(cart => {
+      if (cart && cart.items) {
+        this.cartItemCount = Object.values(cart.items).reduce((sum: number, item: any) => {
+          return sum + item.quantity;
+        }, 0);
+      }
+    });
+
   }
 
-  // Logout method utilizing AuthService
+
   logout() {
     if (isPlatformBrowser(this.platformId)) {
-      this.authService.signout();  // Call the signout method from AuthService
+      this.authService.signout(); 
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Database, ref, get, set, update, child, push } from '@angular/fire/database';
+import { Database, ref, get, set, update, child, push, remove } from '@angular/fire/database';
 import { inject } from '@angular/core';
 import { Product } from './models/product';
 import { BehaviorSubject } from 'rxjs';
@@ -45,7 +45,7 @@ export class ShoppingCartService {
     return push(categoriesRef, { dateCreated: new Date().getTime() });
   }
 
-  async addToCart(product: Product): Promise<void> {
+  private async updateCartItem(product: Product, quantityChange: number): Promise<void> {
     const cartId = await this.getOrCreateCartId();
     const sanitizedKey = product.$key;
     const itemRef = ref(this.db, `/shopping-carts/${cartId}/items/${sanitizedKey}`);
@@ -53,10 +53,10 @@ export class ShoppingCartService {
     const itemSnapshot = await get(itemRef); 
     const itemData = itemSnapshot.val();
     
-    if (itemData) {
-      const newQuantity = (itemData.quantity || 0) + 1;
+    const newQuantity = (itemData?.quantity || 0) + quantityChange;
+    
+    if (newQuantity > 0) {
       await update(itemRef, { quantity: newQuantity });
-
       this.cartSubject.next({
         ...this.cartSubject.value,
         items: {
@@ -65,27 +65,21 @@ export class ShoppingCartService {
         }
       });
     } else {
-      await set(itemRef, {
-        product: {
-          category: product.category,
-          imageUrl: product.imageUrl,
-          price: product.price,
-          title: product.title,
-        },
-        quantity: 1
-      });
-
+      await remove(itemRef); 
+      const { [sanitizedKey]: removedItem, ...remainingItems } = this.cartSubject.value.items;
       this.cartSubject.next({
         ...this.cartSubject.value,
-        items: {
-          ...this.cartSubject.value.items,
-          [sanitizedKey]: {
-            product,
-            quantity: 1
-          }
-        }
+        items: remainingItems
       });
     }
+  }
+  
+  async addToCart(product: Product): Promise<void> {
+    await this.updateCartItem(product, 1);
+  }
+  
+  async removeFromCart(product: Product): Promise<void> {
+    await this.updateCartItem(product, -1); 
   }
 
   private getLocalStorageItem(key: string): string | null {

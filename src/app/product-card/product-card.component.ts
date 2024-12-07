@@ -21,21 +21,22 @@ export class ProductCardComponent implements OnInit {
   constructor(private cartService: ShoppingCartService) {}
 
   ngOnInit(): void {
-    // Subscribe to cart updates
     this.cartSubscription = this.cartService.cart$.subscribe(cart => {
-      this.shoppingCart = cart; // Update shoppingCart when cart data changes
+      this.shoppingCart = cart;
     });
   }
 
   ngOnDestroy(): void {
-    // Unsubscribe to prevent memory leaks
     if (this.cartSubscription) {
       this.cartSubscription.unsubscribe();
     }
   }
 
-  addToCart(product: Product) {
-    this.cartService.addToCart(product);
+  addToCart() {
+    this.cartService.addToCart(this.product);
+  }
+  removeFromCart(){
+    this.cartService.removeFromCart(this.product);
   }
 
   getQuantity(): number {
